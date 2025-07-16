@@ -3,6 +3,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { blink } from '../blink/client'
 
 export function Header() {
   return (
@@ -56,7 +57,7 @@ export function Header() {
               <DropdownMenuItem>
                 <span>Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => blink.auth.logout()}>
                 <span>Sign out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

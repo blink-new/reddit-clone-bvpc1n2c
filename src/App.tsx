@@ -3,17 +3,25 @@ import { Header } from './components/Header'
 import { Sidebar } from './components/Sidebar'
 import { FeedTabs } from './components/FeedTabs'
 import { PostCard } from './components/PostCard'
-import { mockPosts } from './data/mockData'
+import { CreatePostDialog } from './components/CreatePostDialog'
+import { usePosts } from './hooks/usePosts'
+import { seedInitialData } from './utils/seedData'
 import { blink } from './blink/client'
 
 function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const { posts, loading: postsLoading, error: postsError, voteOnPost } = usePosts()
 
   useEffect(() => {
     const unsubscribe = blink.auth.onAuthStateChanged((state) => {
       setUser(state.user)
       setLoading(state.isLoading)
+      
+      // Seed initial data when user is authenticated
+      if (state.user && !state.isLoading) {
+        seedInitialData()
+      }
     })
     return unsubscribe
   }, [])
@@ -62,14 +70,42 @@ function App() {
           {/* Main Content */}
           <main className="flex-1 max-w-2xl">
             <div className="mb-6">
+              <CreatePostDialog />
+            </div>
+            
+            <div className="mb-6">
               <FeedTabs />
             </div>
             
-            <div className="space-y-4">
-              {mockPosts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
+            {postsError && (
+              <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-4">
+                {postsError}
+              </div>
+            )}
+            
+            {postsLoading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="bg-card p-6 rounded-lg border animate-pulse">
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
+                    <div className="h-20 bg-muted rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium mb-2">No posts yet</h3>
+                <p className="text-muted-foreground mb-4">Be the first to create a post!</p>
+                <CreatePostDialog />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} onVote={voteOnPost} />
+                ))}
+              </div>
+            )}
           </main>
 
           {/* Sidebar */}

@@ -4,26 +4,41 @@ import { Card, CardContent, CardHeader } from './ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Badge } from './ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Post } from '../types'
+import { useState } from 'react'
 
 interface PostCardProps {
-  post: {
-    id: string
-    title: string
-    content?: string
-    subreddit: string
-    author: string
-    upvotes: number
-    downvotes: number
-    commentCount: number
-    timeAgo: string
-    postType: 'text' | 'link' | 'image'
-    url?: string
-    imageUrl?: string
-  }
+  post: Post
+  onVote?: (postId: string, voteType: 'upvote' | 'downvote') => Promise<void>
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onVote }: PostCardProps) {
+  const [voting, setVoting] = useState(false)
   const score = post.upvotes - post.downvotes
+  
+  const handleVote = async (voteType: 'upvote' | 'downvote') => {
+    if (!onVote || voting) return
+    
+    setVoting(true)
+    try {
+      await onVote(post.id, voteType)
+    } catch (error) {
+      console.error('Failed to vote:', error)
+    } finally {
+      setVoting(false)
+    }
+  }
+  
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+    
+    if (diffInSeconds < 60) return 'just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+    return `${Math.floor(diffInSeconds / 86400)}d ago`
+  }
 
   return (
     <Card className="mb-4">
@@ -31,9 +46,9 @@ export function PostCard({ post }: PostCardProps) {
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <span className="font-medium text-foreground">r/{post.subreddit}</span>
           <span>•</span>
-          <span>Posted by u/{post.author}</span>
+          <span>Posted by u/{post.authorUsername}</span>
           <span>•</span>
-          <span>{post.timeAgo}</span>
+          <span>{formatTimeAgo(post.createdAt)}</span>
         </div>
       </CardHeader>
       
@@ -41,11 +56,23 @@ export function PostCard({ post }: PostCardProps) {
         <div className="flex space-x-3">
           {/* Voting */}
           <div className="flex flex-col items-center space-y-1 min-w-[40px]">
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
+              onClick={() => handleVote('upvote')}
+              disabled={voting}
+            >
               <ArrowUp className="h-4 w-4" />
             </Button>
             <span className="text-sm font-medium">{score}</span>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => handleVote('downvote')}
+              disabled={voting}
+            >
               <ArrowDown className="h-4 w-4" />
             </Button>
           </div>
