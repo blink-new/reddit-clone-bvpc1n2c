@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar'
 import { FeedTabs } from './components/FeedTabs'
 import { PostCard } from './components/PostCard'
 import { CreatePostDialog } from './components/CreatePostDialog'
+import { Toaster } from './components/ui/toaster'
 import { usePosts } from './hooks/usePosts'
 import { seedInitialData } from './utils/seedData'
 import { blink } from './blink/client'
@@ -112,6 +113,7 @@ function App() {
           <Sidebar />
         </div>
       </div>
+      <Toaster />
     </div>
   )
 }

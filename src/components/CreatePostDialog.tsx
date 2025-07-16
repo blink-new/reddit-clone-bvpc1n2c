@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Link, Image, Type } from 'lucide-react'
+import { Plus, Link, Image, Type, Users } from 'lucide-react'
 import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 import { Input } from './ui/input'
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Label } from './ui/label'
 import { useSubreddits } from '../hooks/useSubreddits'
 import { usePosts } from '../hooks/usePosts'
+import { CreateCommunityDialog } from './CreateCommunityDialog'
 
 export function CreatePostDialog() {
   const [open, setOpen] = useState(false)
@@ -69,18 +70,27 @@ export function CreatePostDialog() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="subreddit">Choose a community</Label>
-            <Select value={selectedSubreddit} onValueChange={setSelectedSubreddit}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a subreddit" />
-              </SelectTrigger>
-              <SelectContent>
-                {subreddits.map((subreddit) => (
-                  <SelectItem key={subreddit.id} value={subreddit.name}>
-                    r/{subreddit.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {subreddits.length === 0 ? (
+              <div className="text-center py-6 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                <Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground mb-3">No communities available</p>
+                <p className="text-xs text-muted-foreground mb-4">Create a community first to post</p>
+                <CreateCommunityDialog />
+              </div>
+            ) : (
+              <Select value={selectedSubreddit} onValueChange={setSelectedSubreddit}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a subreddit" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subreddits.map((subreddit) => (
+                    <SelectItem key={subreddit.id} value={subreddit.name}>
+                      r/{subreddit.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <Tabs value={postType} onValueChange={(value) => setPostType(value as 'text' | 'link' | 'image')}>

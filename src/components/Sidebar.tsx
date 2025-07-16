@@ -3,6 +3,7 @@ import { Button } from './ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Separator } from './ui/separator'
 import { useSubreddits } from '../hooks/useSubreddits'
+import { CreateCommunityDialog } from './CreateCommunityDialog'
 
 
 
@@ -68,6 +69,12 @@ export function Sidebar() {
                 </div>
               ))}
             </div>
+          ) : subreddits.length === 0 ? (
+            <div className="text-center py-6">
+              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground mb-4">No communities yet</p>
+              <CreateCommunityDialog />
+            </div>
           ) : (
             <div className="space-y-2">
               {subreddits.slice(0, 5).map((sub) => (
@@ -88,12 +95,11 @@ export function Sidebar() {
                   </Button>
                 </div>
               ))}
+              <div className="pt-2">
+                <CreateCommunityDialog />
+              </div>
             </div>
           )}
-          <Button variant="ghost" className="w-full mt-3 text-accent">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Community
-          </Button>
         </CardContent>
       </Card>
 
